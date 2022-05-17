@@ -1,7 +1,13 @@
 # probending-arena-reservation
 
-to start the service: `docker-compose up` in terminal
+In `docker` directory:
 
-to stop the service: `docker-compose down` in terminal
+to init cassandra cluster: `./setup.sh`
 
-installing `docker-compose` may be required. For Ubuntu: `sudo apt install docker-compose`
+to stop the cluster `./stop.sh`
+
+to start the cluster `./start.sh`
+
+to eradicate all existing parts of cassandra `./cleanup.sh`
+
+`chmod +x [script name]` may be required
