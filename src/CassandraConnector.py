@@ -1,5 +1,5 @@
 from cassandra.cluster import Cluster
-from db.entity import Entity
+from .db.entity import Entity
 
 
 class CassandraConnector:
@@ -17,7 +17,7 @@ class CassandraConnector:
         """
         self.session = self.cluster.connect()
         command = f"CREATE KEYSPACE IF NOT EXISTS {keyspace}  WITH REPLICATION = " + \
-                  "{" + f"'class': {strategy},'replication_factor': {replication_factor}" \
+                  "{" + f"'class': '{strategy}','replication_factor': {replication_factor}" \
                   + "};"
 
         self.session.execute(command)
