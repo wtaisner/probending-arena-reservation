@@ -1,5 +1,9 @@
 from cassandra.cluster import Cluster
-from .db.entity import Entity
+from .db.table import Table
+from .db.initial_entities import God
+
+TABLE_ENTITY = Table()
+GOD = God()
 
 
 class CassandraConnector:
@@ -9,6 +13,7 @@ class CassandraConnector:
         self.session = None
         self._create_session(keyspace)
         self._create_tables()
+        self._populate()
 
     def _create_session(self, keyspace: str, replication_factor: int = 3, strategy: str = 'SimpleStrategy') -> None:
         """
@@ -16,16 +21,31 @@ class CassandraConnector:
         :param keyspace: a string with the desired keyspace name
         """
         self.session = self.cluster.connect()
+        self.session.default_timeout = 40
         command = f"CREATE KEYSPACE IF NOT EXISTS {keyspace}  WITH REPLICATION = " + \
                   "{" + f"'class': '{strategy}','replication_factor': {replication_factor}" \
                   + "};"
 
         self.session.execute(command)
+        self.session.execute(f"USE {keyspace};")
         self.session.set_keyspace(keyspace)
 
     def _create_tables(self) -> None:
         """
         Initialize tables according to the schemas available in db.Entity
         """
-        for table in Entity.tables:
+        # drop all tables -> DROP TABLE command doesn't stack, hence list
+        queries = TABLE_ENTITY.cleanup()
+        for query in queries:
+            self.session.execute(query)
+
+        # recreate all tables
+        for table in TABLE_ENTITY.tables:
             self.session.execute(table)
+
+    def _populate(self) -> None:
+        """
+        Populate the tables with the initial data
+        """
+        for query in GOD.populate():
+            self.session.execute(query)
