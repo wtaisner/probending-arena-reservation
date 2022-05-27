@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Union, Literal
 
 import uuid
 
@@ -16,14 +16,17 @@ class God:
         self.arena_columns_types = ['UUID', 'text', 'text']
         self.seats_columns = ['seat_id', 'arena_id']
         self.seats_columns_types = ['UUID', 'UUID']
-        self.arenas = ["Uncles Iroh Arena", "Sokkas Arena"]
+        self.arenas = ["Uncles Iroh Arena", "Sokkas Arena", "Azulas Arena"]
         self.arenas_id = [uuid.uuid4() for _ in range(len(self.arenas))]
-        self.address = ['Ba Sing Se', 'Capitol City']
+        self.address = ['Ba Sing Se', 'Capitol City', 'Imperial City']
         self.teams = ["Dragons of the West", "Fire Ferrets"]
         self.query_engine = QueryEngine()
 
     def populate(self) -> List[str]:
-        queries = [self._init_arenas(), self._init_seats()]
+        queries = [self._init_arenas(),
+                   self._init_seats(),
+                   self._init_seats(table_name='available_seat'),
+                   ]
 
         # TODO: add next initializations
 
@@ -36,12 +39,12 @@ class God:
                 'arena', self.arena_columns, self.arena_columns_types, [arena_id, arena, address])
         return query + " APPLY BATCH; "
 
-    def _init_seats(self) -> str:
+    def _init_seats(self, num_seats: int = 10, table_name: Literal['seat', 'available_seat'] = 'seat') -> str:
         query = 'BEGIN BATCH '
         for arena_id in self.arenas_id:
-            seat_id = [uuid.uuid4() for _ in range(10)]
+            seat_id = [uuid.uuid4() for _ in range(num_seats)]
             for idx in seat_id:
                 query += self.query_engine.insert_record(
-                    'seat', self.seats_columns, self.seats_columns_types, [idx, arena_id])
+                    table_name, self.seats_columns, self.seats_columns_types, [idx, arena_id])
 
         return query + " APPLY BATCH; "
