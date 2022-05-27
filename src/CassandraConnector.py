@@ -38,10 +38,12 @@ class CassandraConnector:
         queries = TABLE_ENTITY.cleanup()
         for query in queries:
             self.session.execute(query)
+        print("LOG: tables cleared")
 
         # recreate all tables
         for table in TABLE_ENTITY.tables:
             self.session.execute(table)
+        print("LOG: tables created")
 
     def _populate(self) -> None:
         """
@@ -49,3 +51,16 @@ class CassandraConnector:
         """
         for query in GOD.populate():
             self.session.execute(query)
+        print("LOG: initial entities inserted")
+
+    def execute_query(self, query: str) -> None:
+        """
+        execute external query
+        :param query: CQL query
+        :return: None
+        """
+        try:
+            res = self.session.execute(query)
+            print(res.all())
+        except:
+            print("Invalid query, please try again.")

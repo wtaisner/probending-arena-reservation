@@ -15,15 +15,11 @@ def connect() -> CassandraConnector:
 def main() -> None:
     client = connect()
     while True:
-        result = pyip.inputStr('Please insert your query: ')
-        if result == 'grzenda-menda':
+        query = pyip.inputStr('Please insert your query: ')
+        if query == 'finish':
             break
         else:
-            try:
-                res = client.session.execute(result)
-                print(res.all())
-            except ValueError:
-                raise ValueError('Invalid query you idiot')
+            client.execute_query(query)
 
 
 if __name__ == '__main__':
