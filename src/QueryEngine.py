@@ -12,19 +12,26 @@ class QueryEngine:
 
     @staticmethod
     def _map_to_str(column_type, value):
-        if column_type == 'text' or column_type == "UUID":
+        if column_type == 'text' or column_type == "UUID" or column_type == 'date':
             return f"'{value}'"
         else:
             return f"{value}"
 
-    def update_record(self, table_name: str, column: str, column_type: str, value: Any, where_column: str, where_value: UUID, *args) -> str:
-        query = f"UPDATE {table_name} SET {column} = {self._map_to_str(column_type, value)} "\
-            f"WHERE {where_column} = '{where_value}' IF EXISTS;"
+    def update_record(self, table_name: str, column: str, column_type: str, value: Any, where_column: str,
+                      where_value: UUID, *args) -> str:
+        query = f"UPDATE {table_name} SET {column} = {self._map_to_str(column_type, value)} " \
+                f"WHERE {where_column} = '{where_value}' IF EXISTS;"
         return query
 
-    def query_record(self, table_name: str, columns: str, where_column: str, column_type: str, where_value: Any, *args) -> str:
-        query = f"SELECT {columns} from {table_name} "\
-            f"WHERE {where_column} = {self._map_to_str(column_type, where_value)};"
+    def query_record(self, table_name: str, columns: str, where_column: str, column_type: str, where_value: Any,
+                     *args) -> str:
+        query = f"SELECT {columns} from {table_name} " \
+                f"WHERE {where_column} = {self._map_to_str(column_type, where_value)};"
+        return query
+
+    @staticmethod
+    def query_all_records(table_name: str, columns: str) -> str:
+        query = f"SELECT {columns} FROM {table_name} ;"
         return query
 
     @staticmethod
@@ -32,7 +39,8 @@ class QueryEngine:
         query = f"DELETE FROM {table_name} WHERE {where_column} = '{where_value}' IF EXISTS;"
         return query
 
-    def insert_record(self, table_name: str, columns: List[str], columns_types: List[str], values: List[Any], *args) -> str:
+    def insert_record(self, table_name: str, columns: List[str], columns_types: List[str], values: List[Any],
+                      *args) -> str:
 
         columns_str = ""
         values_str = ""

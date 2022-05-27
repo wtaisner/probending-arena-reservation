@@ -35,8 +35,8 @@ class Table:
            "game_id text," \
            "team_1 text," \
            "team_2 text," \
-           "arena_id int," \
-           "game_date date," \
+           "arena_id text," \
+           "game_date timestamp," \
            "PRIMARY KEY(game_id)" \
            "); "
 

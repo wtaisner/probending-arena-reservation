@@ -1,7 +1,7 @@
 import pyinputplus as pyip
 
 from src.CassandraConnector import CassandraConnector
-from src.QueryEngine import QueryEngine
+from src.ReservationSystem import ReservationSystem
 
 
 def connect() -> CassandraConnector:
@@ -14,12 +14,14 @@ def connect() -> CassandraConnector:
 
 def main() -> None:
     client = connect()
-    while True:
-        query = pyip.inputStr('Please insert your query: ')
-        if query == 'finish':
-            break
-        else:
-            client.execute_query(query)
+    rs = ReservationSystem(client)
+    rs.main()
+    # while True:
+    #     query = pyip.inputStr('Please insert your query: ')
+    #     if query == 'finish':
+    #         break
+    #     else:
+    #         client.execute_query(query)
 
 
 if __name__ == '__main__':

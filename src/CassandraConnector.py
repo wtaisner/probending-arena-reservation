@@ -1,4 +1,6 @@
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, ResultSet
+from cassandra.query import tuple_factory
+
 from .db.table import Table
 from .db.initial_entities import God
 
@@ -29,6 +31,7 @@ class CassandraConnector:
         self.session.execute(command)
         self.session.execute(f"USE {keyspace};")
         self.session.set_keyspace(keyspace)
+        self.session.row_factory = tuple_factory  # return row as a tuple, not Row object
 
     def _create_tables(self) -> None:
         """
@@ -53,7 +56,7 @@ class CassandraConnector:
             self.session.execute(query)
         print("LOG: initial entities inserted")
 
-    def execute_query(self, query: str) -> None:
+    def execute_query(self, query: str) -> ResultSet:
         """
         execute external query
         :param query: CQL query
@@ -61,6 +64,7 @@ class CassandraConnector:
         """
         try:
             res = self.session.execute(query)
-            print(res.all())
+            # print(res.all())
+            return res
         except:
             print("Invalid query, please try again.")
