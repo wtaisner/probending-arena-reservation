@@ -10,7 +10,8 @@ class QueryEngine:
     def __init__(self):
         pass
 
-    def _map_to_str(self, column_type, value):
+    @staticmethod
+    def _map_to_str(column_type, value):
         if column_type == 'text' or column_type == "UUID":
             return f"'{value}'"
         else:
@@ -26,7 +27,8 @@ class QueryEngine:
             f"WHERE {where_column} = {self._map_to_str(column_type, where_value)};"
         return query
 
-    def delete_record(self, table_name: str, where_column: str, where_value: UUID, *args) -> str:
+    @staticmethod
+    def delete_record(table_name: str, where_column: str, where_value: UUID, *args) -> str:
         query = f"DELETE FROM {table_name} WHERE {where_column} = '{where_value}' IF EXISTS;"
         return query
 
