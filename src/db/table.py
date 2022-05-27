@@ -12,8 +12,14 @@ class Table:
     seat = "CREATE TABLE IF NOT EXISTS seat (" \
            "seat_id text," \
            "arena_id text," \
-           "PRIMARY KEY(seat_id)" \
+           "PRIMARY KEY(seat_id, arena_id)" \
            "); "
+
+    available_seat = "CREATE TABLE IF NOT EXISTS available_seat (" \
+                     "seat_id text," \
+                     "arena_id text," \
+                     "PRIMARY KEY(seat_id, arena_id)" \
+                     "); "
 
     reservation = "CREATE TABLE IF NOT EXISTS reservation (" \
                   "reservation_id text," \
@@ -41,12 +47,13 @@ class Table:
            "PRIMARY KEY (user_id)" \
            "); "
 
-    tables = [arena, seat, reservation, game, user]
+    tables = [arena, seat, available_seat, reservation, game, user]
 
     @staticmethod
     def cleanup() -> List[str]:
         queries = ["DROP TABLE IF EXISTS arena; ",
                    "DROP TABLE IF EXISTS seat; ",
+                   "DROP TABLE IF EXISTS available_seat; ",
                    "DROP TABLE IF EXISTS reservation; ",
                    "DROP TABLE IF EXISTS game; ",
                    "DROP TABLE IF EXISTS user; "]
