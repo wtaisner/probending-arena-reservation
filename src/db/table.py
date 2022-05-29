@@ -18,7 +18,8 @@ class Table:
     available_seat = "CREATE TABLE IF NOT EXISTS available_seat (" \
                      "seat_id text," \
                      "arena_id text," \
-                     "PRIMARY KEY(seat_id, arena_id)" \
+                     "game_id text," \
+                     "PRIMARY KEY(seat_id, arena_id, game_id)" \
                      "); "
 
     reservation = "CREATE TABLE IF NOT EXISTS reservation (" \
