@@ -1,4 +1,4 @@
-from typing import Literal, List, Dict
+from typing import Dict
 
 from src.CassandraConnector import CassandraConnector
 import pyinputplus as pyip
@@ -27,12 +27,21 @@ class ReservationSystem:
             elif result == 'list games':
                 self._list_all_games()
             print('=========================================================')
+
     def _get_arena_name_by_id(self, arena_id: str) -> str:
+        """
+        utility function to get arena name by id
+        :param arena_id: string with arena_id
+        :return: arena name
+        """
         arena_name_query = self.query_engine.query_record('arena', 'name', 'arena_id', 'UUID', arena_id)
         arena_name = self.client.execute_query(arena_name_query)[0][0]
         return arena_name
 
     def _list_all_games(self) -> None:
+        """
+        simple utility function to print all available games
+        """
         query = self.query_engine.query_all_records('game', 'arena_id, team_1, team_2, game_date')
         result_set = self.client.execute_query(query)
         for res in result_set:
@@ -41,9 +50,13 @@ class ReservationSystem:
             print(f'- {team_1} vs {team_2} at {arena_name} on {game_date}\n')
 
     def _get_all_games(self) -> Dict[str, str]:
-        query = self.query_engine.query_all_records('game', 'game_id, arena_id, team_1, team_2, game_date',)
+        """
+        get all games in dictionary, in which a string describing the game is the key, and game_id is the value
+        # TODO: consider changing key to be a smaller cancer
+        :return: dictionary as above
+        """
+        query = self.query_engine.query_all_records('game', 'game_id, arena_id, team_1, team_2, game_date', )
         result_set = self.client.execute_query(query)
-        # print(result_set)
         games = dict()
         for res in result_set:
             game_id, arena_id, team_1, team_2, game_date = res
@@ -51,8 +64,12 @@ class ReservationSystem:
             games[f'- {team_1} vs {team_2} at {arena_name} on {game_date}'] = game_id
         return games
 
-    def _reservation_parser(self):
+    def _reservation_parser(self) -> str:
+        """
+        utility function; displays menu choice for user, returns corresponding game_id
+        :return: string with game_id
+        """
         games = self._get_all_games()
         names = list(games.keys())
         result = pyip.inputMenu(names, lettered=True)
-        print(games[result])
+        return result
