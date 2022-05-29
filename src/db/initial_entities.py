@@ -16,6 +16,8 @@ class God:
         self.arena_columns_types = ['UUID', 'text', 'text']
         self.seats_columns = ['seat_id', 'arena_id']
         self.seats_columns_types = ['UUID', 'UUID']
+        self.available_seats_columns = ['seat_id', 'arena_id', 'game_id']
+        self.available_seats_columns_types = ['UUID', 'UUID', 'UUID']
         self.arenas = ["Uncles Iroh Arena", "Sokkas Arena", "Azulas Arena"]
         self.arenas_id = [uuid.uuid4() for _ in range(len(self.arenas))]
         self.address = ['Ba Sing Se', 'Capitol City', 'Imperial City']
@@ -23,6 +25,8 @@ class God:
                       "Laogai Lion Vultures", "Xiao Yao Zebra Frogs"]
         self.game_columns = ['game_id', 'team_1', 'team_2', 'arena_id', 'game_date']
         self.game_columns_types = ['UUID', 'text', 'text', 'UUID', 'date']
+        self.num_games = 10
+        self.games_id = [uuid.uuid4() for _ in range(self.num_games)]
         self.query_engine = QueryEngine()
 
     def populate(self) -> List[str]:
@@ -46,18 +50,24 @@ class God:
 
     def _init_seats(self, num_seats: int = 10, table_name: Literal['seat', 'available_seat'] = 'seat') -> str:
         query = 'BEGIN BATCH '
-        for arena_id in self.arenas_id:
-            seat_id = [uuid.uuid4() for _ in range(num_seats)]
-            for idx in seat_id:
-                query += self.query_engine.insert_record(
-                    table_name, self.seats_columns, self.seats_columns_types, [idx, arena_id])
+        for game_id in self.games_id:
+            for arena_id in self.arenas_id:
+                seat_id = [uuid.uuid4() for _ in range(num_seats)]
+                for idx in seat_id:
+                    if table_name == 'seat':
+                        query += self.query_engine.insert_record(
+                            table_name, self.seats_columns, self.seats_columns_types, [idx, arena_id])
+                    elif table_name == 'available_seat':
+                        query += self.query_engine.insert_record(
+                            table_name, self.available_seats_columns, self.available_seats_columns_types,
+                            [idx, arena_id, game_id])
 
         return query + " APPLY BATCH; "
 
-    def _init_games(self, num_games: int = 10):
+    def _init_games(self):
         query = 'BEGIN BATCH '
-        games_id = [uuid.uuid4() for _ in range(num_games)]
-        for idx, game_id in enumerate(games_id):
+
+        for idx, game_id in enumerate(self.games_id):
             team_1, team_2 = random.sample(self.teams, 2)
             arena_id = random.sample(self.arenas_id, 1)[0]
 
