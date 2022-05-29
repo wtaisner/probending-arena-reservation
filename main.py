@@ -16,12 +16,6 @@ def main() -> None:
     client = connect()
     rs = ReservationSystem(client)
     rs.main()
-    # while True:
-    #     query = pyip.inputStr('Please insert your query: ')
-    #     if query == 'finish':
-    #         break
-    #     else:
-    #         client.execute_query(query)
 
 
 if __name__ == '__main__':
