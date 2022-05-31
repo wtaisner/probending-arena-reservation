@@ -1,3 +1,5 @@
+import uuid
+import time
 from typing import Dict
 
 from src.CassandraConnector import CassandraConnector
@@ -17,7 +19,8 @@ class ReservationSystem:
               f"To select an option, simply type a number or a letter corresponding to it")
         while True:
             print("What is it that you want to do?")
-            result = pyip.inputMenu(['list games', 'reservation', 'quit'], lettered=True)
+            result = pyip.inputMenu(
+                ['list games', 'reservation', 'quit'], lettered=True)
             if result == 'finish':
                 break
             elif result == 'reservation':
@@ -34,7 +37,8 @@ class ReservationSystem:
         :param arena_id: string with arena_id
         :return: arena name
         """
-        arena_name_query = self.query_engine.query_record('arena', 'name', 'arena_id', 'UUID', arena_id)
+        arena_name_query = self.query_engine.query_record(
+            'arena', 'name', ['arena_id'], ['UUID'], [arena_id])
         arena_name = self.client.execute_query(arena_name_query)[0][0]
         return arena_name
 
@@ -42,7 +46,8 @@ class ReservationSystem:
         """
         simple utility function to print all available games
         """
-        query = self.query_engine.query_all_records('game', 'arena_id, team_1, team_2, game_date')
+        query = self.query_engine.query_all_records(
+            'game', 'arena_id, team_1, team_2, game_date')
         result_set = self.client.execute_query(query)
         for res in result_set:
             arena_id, team_1, team_2, game_date = res
@@ -55,7 +60,8 @@ class ReservationSystem:
         # TODO: consider changing key to be a smaller cancer
         :return: dictionary as above
         """
-        query = self.query_engine.query_all_records('game', 'game_id, arena_id, team_1, team_2, game_date', )
+        query = self.query_engine.query_all_records(
+            'game', 'game_id, arena_id, team_1, team_2, game_date', )
         result_set = self.client.execute_query(query)
         games = dict()
         for res in result_set:
@@ -72,4 +78,48 @@ class ReservationSystem:
         games = self._get_all_games()
         names = list(games.keys())
         result = pyip.inputMenu(names, lettered=True)
-        return result
+
+        game_id = games[result]
+        query = self.query_engine.query_record(
+            'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
+        result_set = self.client.execute_query(query)[0][0]
+
+        if len(result_set) > 0:
+            seats = [str(i) for i in result_set]
+
+            # TODO: no available seats @annprzy
+            seat = int(pyip.inputMenu(seats))
+
+            result_set.remove(seat)
+
+            query = self.query_engine.update_record(
+                'game', 'available_seats', 'list', result_set, 'game_id', game_id)
+            self.client.execute_query(query)
+
+            user_name = pyip.inputStr('Name:')
+            # TODO: mail validation @wtaisner
+            user_email = pyip.inputStr('Email:')
+            reservation_id = uuid.uuid4()
+
+            data = [reservation_id, seat, game_id, user_name, user_email]
+            columns = ['reservation_id', 'seat_id',
+                       'game_id', 'user', 'user_email']
+            columns_types = ['UUID', 'int', 'UUID', 'text', 'text']
+            query = self.query_engine.insert_record(
+                'reservation', columns, columns_types, data)
+            self.client.execute_query(query)
+
+            time.sleep(1)
+            query = self.query_engine.query_record(
+                'reservation', 'reservation_id', ['game_id', 'seat_id'], ['UUID', 'int'], [game_id, seat])
+            result_set = self.client.execute_query(query)[0][0]
+
+            if result_set == reservation_id:
+                print('Seat reserved - if noone tried to reserve it after you :)')
+            else:
+                print('We were not able to fulfill your request')
+
+        else:
+            print("All seats taken")
+
+        return games[result]

@@ -3,60 +3,38 @@ from typing import List
 
 class Table:
     arena = "CREATE TABLE IF NOT EXISTS arena (" \
-            "arena_id text," \
+            "arena_id uuid," \
             "name text," \
             "address text," \
+            "seats list<int>," \
             "PRIMARY KEY(arena_id)" \
             "); "
 
-    seat = "CREATE TABLE IF NOT EXISTS seat (" \
-           "seat_id text," \
-           "arena_id text," \
-           "PRIMARY KEY(seat_id, arena_id)" \
-           "); "
-
-    available_seat = "CREATE TABLE IF NOT EXISTS available_seat (" \
-                     "seat_id text," \
-                     "arena_id text," \
-                     "game_id text," \
-                     "PRIMARY KEY(seat_id, arena_id, game_id)" \
-                     "); "
-
     reservation = "CREATE TABLE IF NOT EXISTS reservation (" \
-                  "reservation_id text," \
-                  "arena_id text," \
-                  "seat_id text," \
-                  "game_id text," \
-                  "user_id text," \
-                  "game_date date," \
-                  "PRIMARY KEY(reservation_id)" \
+                  "reservation_id uuid," \
+                  "seat_id int," \
+                  "game_id uuid," \
+                  "user text," \
+                  "user_email text," \
+                  "PRIMARY KEY(game_id, seat_id)" \
                   "); "
 
     game = "CREATE TABLE IF NOT EXISTS game (" \
-           "game_id text," \
+           "game_id uuid," \
            "team_1 text," \
            "team_2 text," \
-           "arena_id text," \
+           "arena_id uuid," \
+           "available_seats list<int>," \
            "game_date timestamp," \
            "PRIMARY KEY(game_id)" \
            "); "
 
-    user = "CREATE TABLE IF NOT EXISTS user (" \
-           "user_id text," \
-           "mail text," \
-           "username text," \
-           "PRIMARY KEY (user_id)" \
-           "); "
-
-    tables = [arena, seat, available_seat, reservation, game, user]
+    tables = [arena, reservation, game]
 
     @staticmethod
     def cleanup() -> List[str]:
         queries = ["DROP TABLE IF EXISTS arena; ",
-                   "DROP TABLE IF EXISTS seat; ",
-                   "DROP TABLE IF EXISTS available_seat; ",
                    "DROP TABLE IF EXISTS reservation; ",
-                   "DROP TABLE IF EXISTS game; ",
-                   "DROP TABLE IF EXISTS user; "]
+                   "DROP TABLE IF EXISTS game; "]
 
         return queries
