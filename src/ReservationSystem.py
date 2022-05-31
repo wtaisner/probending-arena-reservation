@@ -70,7 +70,7 @@ class ReservationSystem:
             games[f'- {team_1} vs {team_2} at {arena_name} on {game_date}'] = game_id
         return games
 
-    def _reservation_parser(self) -> str:
+    def _reservation_parser(self) -> None:
         """
         utility function; displays menu choice for user, returns corresponding game_id
         :return: string with game_id
@@ -121,5 +121,3 @@ class ReservationSystem:
 
         else:
             print("All seats taken")
-
-        return games[result]
