@@ -6,12 +6,14 @@ from src.CassandraConnector import CassandraConnector
 import pyinputplus as pyip
 
 from src.QueryEngine import QueryEngine
+from src.Tester import Tester
 
 
 class ReservationSystem:
     def __init__(self, client: CassandraConnector = None):
         self.client = client
         self.query_engine = QueryEngine()
+        self.tester = Tester()
 
     def main(self) -> None:
         print(f"**Welcome to the probending arena reservation system!**\n"
@@ -20,15 +22,19 @@ class ReservationSystem:
         while True:
             print("What is it that you want to do?")
             result = pyip.inputMenu(
-                ['list games', 'reservation', 'quit'], lettered=True)
-            if result == 'finish':
+                ['list games', 'reservation', 'quit', 'stress test 1', 'stress test 2', 'stress test 3'], lettered=True)
+            if result == 'quit':
                 break
             elif result == 'reservation':
                 self._reservation_parser()
-                break
-                # TODO: implement reservation process
             elif result == 'list games':
                 self._list_all_games()
+            elif result == 'stress test 1':
+                self.tester.stress_test_1()
+            elif result == 'stress test 2':
+                self.tester.stress_test_2()
+            elif result == 'stress test 3':
+                self.tester.stress_test_3()
             print('=========================================================')
 
     def _get_arena_name_by_id(self, arena_id: str) -> str:
@@ -57,7 +63,6 @@ class ReservationSystem:
     def _get_all_games(self) -> Dict[str, str]:
         """
         get all games in dictionary, in which a string describing the game is the key, and game_id is the value
-        # TODO: consider changing key to be a smaller cancer
         :return: dictionary as above
         """
         query = self.query_engine.query_all_records(
@@ -87,7 +92,6 @@ class ReservationSystem:
         if len(result_set) > 0:
             seats = [str(i) for i in result_set]
 
-            # TODO: no available seats @annprzy
             seat = int(pyip.inputMenu(seats))
 
             result_set.remove(seat)
@@ -97,7 +101,6 @@ class ReservationSystem:
             self.client.execute_query(query)
 
             user_name = pyip.inputStr('Name:')
-            # TODO: mail validation @wtaisner
             user_email = pyip.inputStr('Email:')
             reservation_id = uuid.uuid4()
 
