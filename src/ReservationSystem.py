@@ -13,7 +13,7 @@ class ReservationSystem:
     def __init__(self, client: CassandraConnector = None):
         self.client = client
         self.query_engine = QueryEngine()
-        self.tester = Tester()
+        self.tester = Tester(self.client)
 
     def main(self) -> None:
         print(f"**Welcome to the probending arena reservation system!**\n"
