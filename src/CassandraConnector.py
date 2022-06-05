@@ -10,12 +10,13 @@ GOD = God()
 
 class CassandraConnector:
 
-    def __init__(self, ip_address, port, keyspace):
+    def __init__(self, ip_address, port, keyspace, initialize: bool = True):
         self.cluster = Cluster([ip_address], port)
         self.session = None
         self._create_session(keyspace)
-        self._create_tables()
-        self._populate()
+        if initialize:
+            self._create_tables()
+            self._populate()
 
     def _create_session(self, keyspace: str, replication_factor: int = 3, strategy: str = 'SimpleStrategy') -> None:
         """
@@ -64,7 +65,18 @@ class CassandraConnector:
         """
         try:
             res = self.session.execute(query)
-            # print(res.all())
             return res
         except:
             print("Invalid query, please try again.")
+
+    def clear_entities(self):
+        self._create_tables()
+        self._populate()
+
+
+def connect(initialize: bool = True) -> CassandraConnector:
+    """
+    utility function that return CassandraConnector object, which contains a session connected to Cassandra cluster
+    :return: connected cassandra session
+    """
+    return CassandraConnector("172.17.0.2", 9042, 'atla', initialize)
