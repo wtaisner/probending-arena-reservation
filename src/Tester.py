@@ -8,29 +8,65 @@ import uuid
 from src.CassandraConnector import *
 from src.QueryEngine import QueryEngine
 
+_TABLES = ['arena', 'reservation', 'game']
+_ID = ['arena_id', 'reservation_id', 'game_id']
+_DATA = zip(_TABLES, _ID)
 
-def _random_action_1(client: CassandraConnector) -> None:
+
+def _random_reservation(client: CassandraConnector):
+    log_user = multiprocessing.current_process().pid
     query_engine = QueryEngine()
-    print('1')
+    games = query_engine.query_all_records('game', '*')
+    games = client.execute_query(games)
 
+    game = random.choice(games.all())
+    game_id = game[0]
+    query = query_engine.query_record(
+        'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
+    result_set = client.execute_query(query)[0][0]
+    if result_set is None:
+        print(f'{[log_user]} no games with available seats')
+    elif len(result_set) > 0:
+        seats = [str(i) for i in result_set]
 
-def _random_action_2(client: CassandraConnector) -> None:
-    query_engine = QueryEngine()
-    print('2')
+        seat = int(random.choice(seats))
+        print(f"{[log_user]} is trying to reserve seat {seat} for {game_id}")
+        result_set.remove(seat)
 
+        query = query_engine.update_record(
+            'game', 'available_seats', 'list', result_set, 'game_id', game_id)
+        client.execute_query(query)
 
-def _random_action_3(client: CassandraConnector) -> None:
-    query_engine = QueryEngine()
-    print('3')
+        user_name = multiprocessing.current_process().pid
+        user_email = multiprocessing.current_process().pid
+        reservation_id = uuid.uuid4()
+
+        data = [reservation_id, seat, game_id, user_name, user_email]
+        columns = ['reservation_id', 'seat_id',
+                   'game_id', 'user', 'user_email']
+        columns_types = ['UUID', 'int', 'UUID', 'text', 'text']
+        query = query_engine.insert_record(
+            'reservation', columns, columns_types, data)
+        client.execute_query(query)
+
+        time.sleep(1)
+        query = query_engine.query_record(
+            'reservation', 'reservation_id', ['game_id', 'seat_id'], ['UUID', 'int'], [game_id, seat])
+        result_set = client.execute_query(query)[0][0]
+
+        if result_set == reservation_id:
+            print(f'{[log_user]} Seat {seat} reserved for {game_id}')
+        else:
+            print(f'{[log_user]} We were not able to fulfill your request; seat {seat}, game_id {game_id}')
+
+    else:
+        print(f"{[log_user]} All seats taken")
 
 
 def _perform_random_action(num: int):
     client = connect(initialize=False)
     for _ in range(num):
-        available_actions = [_random_action_1, _random_action_2, _random_action_3]
-        execute = random.choice(available_actions)
-        print(f"Current user {multiprocessing.current_process().pid}; action: ")
-        execute(client=client)
+        _random_reservation(client)
 
 
 def _util(data: Tuple[str, str]) -> None:
@@ -109,8 +145,15 @@ def stress_test_2() -> None:
     """
     Two or more users perform possible actions randomly
     """
-    with Pool(2) as p:
-        p.map(_perform_random_action, [1000, 1000])
+    print('=========================================================')
+    print('Stress test 2: two or more users perform possible actions randomly')
+    user = 5
+    number = 20
+    print(f'Number of users: {user}, number of random actions of each user: {number}')
+    print('=========================================================')
+
+    with Pool(user) as p:
+        p.map(_perform_random_action, [number for _ in range(user)])
 
 
 def stress_test_3() -> None:
