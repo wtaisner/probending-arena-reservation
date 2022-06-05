@@ -1,19 +1,14 @@
-import uuid
-import time
 from typing import Dict
 
-from src.CassandraConnector import CassandraConnector
 import pyinputplus as pyip
 
-from src.QueryEngine import QueryEngine
-from src.Tester import Tester
+from src.Tester import *
 
 
 class ReservationSystem:
     def __init__(self, client: CassandraConnector = None):
         self.client = client
         self.query_engine = QueryEngine()
-        self.tester = Tester(self.client)
 
     def main(self) -> None:
         print(f"**Welcome to the probending arena reservation system!**\n"
@@ -22,7 +17,7 @@ class ReservationSystem:
         while True:
             print("What is it that you want to do?")
             result = pyip.inputMenu(
-                ['list games', 'reservation', 'quit', 'stress test 1', 'stress test 2', 'stress test 3'], lettered=True)
+                ['list games', 'reservation', 'quit', 'stress test 1', 'stress test 2', 'stress test 3', 'clear tables'], lettered=True)
             if result == 'quit':
                 break
             elif result == 'reservation':
@@ -30,11 +25,13 @@ class ReservationSystem:
             elif result == 'list games':
                 self._list_all_games()
             elif result == 'stress test 1':
-                self.tester.stress_test_1()
+                stress_test_1()
             elif result == 'stress test 2':
-                self.tester.stress_test_2()
+                stress_test_2()
             elif result == 'stress test 3':
-                self.tester.stress_test_3()
+                stress_test_3()
+            elif result == 'clear tables':
+                self.client.clear_entities()
             print('=========================================================')
 
     def _get_arena_name_by_id(self, arena_id: str) -> str:
