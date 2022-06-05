@@ -39,8 +39,10 @@ class Tester:
         Instant reservation of all available seats
         :return:
         """
+        print("Stress test 3: instant reservation of all available seats")
         games = self.query_engine.query_all_records('game', '*')
         games = self.client.execute_query(games)
+        print(f"Game {games[0]}")
         game_id = games[0][0]
         query = self.query_engine.query_record(
             'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
@@ -48,12 +50,9 @@ class Tester:
 
         if len(result_set) > 0:
             seats = [str(i) for i in result_set]
-
+            print(f'Available seats: {seats}')
             query = 'BEGIN BATCH '
             for seat in seats:
-
-            # seat = int(pyip.inputMenu(seats))
-
                 result_set.remove(int(seat))
 
                 update_query = self.query_engine.update_record(
@@ -72,19 +71,12 @@ class Tester:
                     'reservation', columns, columns_types, data)
                 # self.client.execute_query(query)
 
-                # time.sleep(1)
-                # query = self.query_engine.query_record(
-                #     'reservation', 'reservation_id', ['game_id', 'seat_id'], ['UUID', 'int'], [game_id, seat])
-                # result_set = self.client.execute_query(query)[0][0]
-                #
-                # if result_set == reservation_id:
-                #     print('Seat reserved - if noone tried to reserve it after you :)')
-                # else:
-                #     print('We were not able to fulfill your request')
             query += " APPLY BATCH; "
             self.client.execute_query(query)
-            res = self.client.execute_query(self.query_engine.query_all_records('reservation', '*'))
-            for r in res:
-                print(r)
+            print('All seats reserved')
+            res_query = self.query_engine.query_record(
+                'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
+            res = self.client.execute_query(res_query)
+            print(f'Result should be equal to None (or something similar); result = {res.all()}')
         else:
             print("All seats taken")

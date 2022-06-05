@@ -1,5 +1,3 @@
-import pyinputplus as pyip
-
 from src.CassandraConnector import CassandraConnector
 from src.ReservationSystem import ReservationSystem
 
