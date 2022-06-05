@@ -1,5 +1,5 @@
 import random
-from typing import List, Literal
+from typing import List
 import datetime
 import uuid
 import time
@@ -33,8 +33,6 @@ class God:
         queries = [self._init_arenas(),
                    self._init_games(),
                    ]
-
-        # TODO: add next initializations
 
         return queries
 

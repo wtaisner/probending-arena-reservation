@@ -7,9 +7,6 @@ class QueryEngine:
     Would you like some tea, stranger?
     """
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def _map_to_str(column_type, value):
         if column_type == 'text' or column_type == 'date':
