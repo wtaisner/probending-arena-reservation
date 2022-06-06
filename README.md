@@ -31,6 +31,7 @@ We implemented several services that together create the core of our application
 - db - a simple framework for initialization of the database
 
 In addition, we run our database in the distributed manner, on 3 separate nodes. In case one node fails, the system is still able to work flawlessly.
+The schema of the system can be found in the file `DB-schema.pdf`.
 
 ## Problems
 At first, we tried to work on 4 Cassandra nodes, however with the RAM we had on our computers, it was not possible to run them. We quickly fixed this problem, by restraining the number of nodes to 3 and limiting RAM usage for the containers, for presentation purposes. 
