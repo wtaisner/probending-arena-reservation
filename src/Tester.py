@@ -57,7 +57,8 @@ def _random_reservation(client: CassandraConnector):
         if result_set == reservation_id:
             print(f'{[log_user]} Seat {seat} reserved for {game_id}')
         else:
-            print(f'{[log_user]} We were not able to fulfill your request; seat {seat}, game_id {game_id}')
+            print(
+                f'{[log_user]} We were not able to fulfill your request; seat {seat}, game_id {game_id}')
 
     else:
         print(f"{[log_user]} All seats taken")
@@ -86,38 +87,42 @@ def _util(data: Tuple[str, str]) -> None:
         'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
     result_set = client.execute_query(query)[0][0]
 
-    if len(result_set) > 0:
-        seats = [str(i) for i in result_set]
-        print(f'Current user: {user_name} Available seats: {seats}')
-        query = 'BEGIN BATCH '
-        for seat in seats:
-            result_set.remove(int(seat))
+    if result_set is not None:
+        if len(result_set) > 0:
+            seats = [str(i) for i in result_set]
+            print(f'Current user: {user_name} Available seats: {seats}')
+            query = 'BEGIN BATCH '
+            for seat in seats:
+                result_set.remove(int(seat))
 
-            update_query = query_engine.update_record(
-                'game', 'available_seats', 'list', result_set, 'game_id', game_id)
-            client.execute_query(update_query)
+                update_query = query_engine.update_record(
+                    'game', 'available_seats', 'list', result_set, 'game_id', game_id)
+                client.execute_query(update_query)
 
-            reservation_id = uuid.uuid4()
+                reservation_id = uuid.uuid4()
 
-            data = [reservation_id, seat, game_id, user_name, user_email]
-            columns = ['reservation_id', 'seat_id',
-                       'game_id', 'user', 'user_email']
-            columns_types = ['UUID', 'int', 'UUID', 'text', 'text']
-            query += query_engine.insert_record(
-                'reservation', columns, columns_types, data)
+                data = [reservation_id, seat, game_id, user_name, user_email]
+                columns = ['reservation_id', 'seat_id',
+                           'game_id', 'user', 'user_email']
+                columns_types = ['UUID', 'int', 'UUID', 'text', 'text']
+                query += query_engine.insert_record(
+                    'reservation', columns, columns_types, data)
 
-        query += " APPLY BATCH; "
-        client.execute_query(query)
-        print(f'Current user: {user_name} All seats reserved')
-        res_query = query_engine.query_record(
-            'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
-        res = client.execute_query(res_query)
-        print(f'Current user: {user_name} Result should be equal to None (or something similar); result = {res.all()}')
+            query += " APPLY BATCH; "
+            client.execute_query(query)
+            print(f'Current user: {user_name} All seats reserved')
+            res_query = query_engine.query_record(
+                'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
+            res = client.execute_query(res_query)
+            print(
+                f'Current user: {user_name} Result should be equal to None (or something similar); result = {res.all()}')
 
-        res_query = query_engine.query_all_records('reservation', 'user')
-        result = client.execute_query(res_query)
-        for res in result:
-            print(res)
+            res_query = query_engine.query_all_records('reservation', 'user')
+            result = client.execute_query(res_query)
+            for res in result:
+                print(res)
+            else:
+                print(f"Current user: {user_name} All seats taken")
     else:
         print(f"Current user: {user_name} All seats taken")
 
@@ -149,7 +154,8 @@ def stress_test_2() -> None:
     print('Stress test 2: two or more users perform possible actions randomly')
     user = 5
     number = 20
-    print(f'Number of users: {user}, number of random actions of each user: {number}')
+    print(
+        f'Number of users: {user}, number of random actions of each user: {number}')
     print('=========================================================')
 
     with Pool(user) as p:

@@ -86,38 +86,41 @@ class ReservationSystem:
             'game', 'available_seats', ['game_id'], ['UUID'], [game_id])
         result_set = self.client.execute_query(query)[0][0]
 
-        if len(result_set) > 0:
-            seats = [str(i) for i in result_set]
+        if result_set is not None:
+            if len(result_set) > 0:
+                seats = [str(i) for i in result_set]
 
-            seat = int(pyip.inputMenu(seats))
+                seat = int(pyip.inputMenu(seats))
 
-            result_set.remove(seat)
+                result_set.remove(seat)
 
-            query = self.query_engine.update_record(
-                'game', 'available_seats', 'list', result_set, 'game_id', game_id)
-            self.client.execute_query(query)
+                query = self.query_engine.update_record(
+                    'game', 'available_seats', 'list', result_set, 'game_id', game_id)
+                self.client.execute_query(query)
 
-            user_name = pyip.inputStr('Name:')
-            user_email = pyip.inputStr('Email:')
-            reservation_id = uuid.uuid4()
+                user_name = pyip.inputStr('Name:')
+                user_email = pyip.inputStr('Email:')
+                reservation_id = uuid.uuid4()
 
-            data = [reservation_id, seat, game_id, user_name, user_email]
-            columns = ['reservation_id', 'seat_id',
-                       'game_id', 'user', 'user_email']
-            columns_types = ['UUID', 'int', 'UUID', 'text', 'text']
-            query = self.query_engine.insert_record(
-                'reservation', columns, columns_types, data)
-            self.client.execute_query(query)
+                data = [reservation_id, seat, game_id, user_name, user_email]
+                columns = ['reservation_id', 'seat_id',
+                           'game_id', 'user', 'user_email']
+                columns_types = ['UUID', 'int', 'UUID', 'text', 'text']
+                query = self.query_engine.insert_record(
+                    'reservation', columns, columns_types, data)
+                self.client.execute_query(query)
 
-            time.sleep(1)
-            query = self.query_engine.query_record(
-                'reservation', 'reservation_id', ['game_id', 'seat_id'], ['UUID', 'int'], [game_id, seat])
-            result_set = self.client.execute_query(query)[0][0]
+                time.sleep(1)
+                query = self.query_engine.query_record(
+                    'reservation', 'reservation_id', ['game_id', 'seat_id'], ['UUID', 'int'], [game_id, seat])
+                result_set = self.client.execute_query(query)[0][0]
 
-            if result_set == reservation_id:
-                print('Seat reserved - if noone tried to reserve it after you :)')
+                if result_set == reservation_id:
+                    print('Seat reserved - if noone tried to reserve it after you :)')
+                else:
+                    print('We were not able to fulfill your request')
             else:
-                print('We were not able to fulfill your request')
+                print("All seats taken")
 
         else:
             print("All seats taken")
